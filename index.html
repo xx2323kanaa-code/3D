@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mobile Demo – Step 2</title>
+  <title>Mobile Demo – Step 3</title>
 
   <style>
     body {
@@ -20,6 +20,12 @@
       display: block;
     }
 
+    #video {
+      width: 100%;
+      height: auto;
+      display: none;
+    }
+
     #panel {
       position: fixed;
       bottom: 0;
@@ -27,12 +33,12 @@
       right: 0;
       padding: 16px;
       background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
     }
 
     button {
-      font-size: 18px;
-      padding: 12px 24px;
+      font-size: 16px;
+      padding: 10px 18px;
+      margin: 6px;
       border-radius: 10px;
       border: none;
       background: #00e0ff;
@@ -43,27 +49,61 @@
 
 <body>
 
-  <!-- 3D風・未来義手 静止画 -->
+  <!-- 静止画（最初に表示） -->
   <img id="hero" src="relax.png" alt="Future Hand">
 
-  <!-- 下部パネル -->
+  <!-- カメラ映像（最初は非表示） -->
+  <video id="video" autoplay playsinline></video>
+
+  <!-- 下の操作パネル -->
   <div id="panel">
-    <button id="startBtn">Start Demo</button>
-    <div id="status" style="margin-top:8px;font-size:14px;opacity:0.8;">
+    <button id="btnCamera">Start Camera</button>
+    <button id="btnImage">Change Image</button>
+    <div id="status" style="margin-top:8px;font-size:14px;">
       Ready
     </div>
   </div>
 
   <script>
-    const btn = document.getElementById("startBtn");
+    const hero   = document.getElementById("hero");
+    const video  = document.getElementById("video");
     const status = document.getElementById("status");
 
-    btn.addEventListener("click", () => {
-      status.textContent = "Button OK (JS working)";
-      console.log("STEP2: button clicked");
+    const btnCamera = document.getElementById("btnCamera");
+    const btnImage  = document.getElementById("btnImage");
+
+    let usingSalute = false;
+    let cameraOn = false;
+
+    // 画像切り替え
+    btnImage.addEventListener("click", () => {
+      usingSalute = !usingSalute;
+      hero.src = usingSalute ? "salute.png" : "relax.png";
+      status.textContent = "Image: " + (usingSalute ? "salute" : "relax");
+    });
+
+    // カメラ起動（必ずボタン操作）
+    btnCamera.addEventListener("click", async () => {
+      if (cameraOn) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false
+        });
+
+        video.srcObject = stream;
+        video.style.display = "block";
+        hero.style.display = "none";
+
+        cameraOn = true;
+        status.textContent = "Camera ON";
+      } catch (e) {
+        status.textContent = "Camera failed";
+        alert("カメラを起動できませんでした");
+      }
     });
   </script>
 
 </body>
 </html>
-
