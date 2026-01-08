@@ -1,17 +1,12 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Colorful Custom Hand AI Project (fcAI)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>fcAI – PNG Overlay Presentation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ====== External libs ====== -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-cpu"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-layers"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
   <style>
@@ -20,13 +15,13 @@
       background: #000;
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow: hidden;
     }
 
     #appContainer {
       position: relative;
       width: 100vw;
       height: 100vh;
+      overflow: hidden;
     }
 
     #videoWrapper {
@@ -47,33 +42,32 @@
       pointer-events: none;
     }
 
-    /* === PRESENTATION MODE: disable SVG hands === */
+    /* 線画完全無効 */
     #overlaySvg { display: none !important; }
 
-    /* === PNG overlay hands === */
+    /* PNG overlay */
     .handPng {
-      position: fixed;
+      position: absolute;
       top: 10%;
       left: 27.5%;
       width: 45%;
-      height: auto;
-      opacity: 0.75;
+      opacity: 0.8;
       pointer-events: none;
       display: none;
-      z-index: 20;
+      z-index: 5;
     }
-    #imgSalute { width: 30%; top: 14%; opacity: 0.85; }
 
-    /* ---- existing UI styles (unchanged) ---- */
+    #imgSalute { width: 30%; top: 14%; }
+
     #resultArea {
       position: absolute;
-      bottom: 72px;
-      left: 12px;
-      right: 12px;
-      z-index: 3;
-      background: rgba(0,0,0,0.5);
-      padding: 8px 12px;
-      border-radius: 8px;
+      bottom: 80px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+      background: rgba(0,0,0,0.6);
+      padding: 8px;
+      border-radius: 6px;
       font-size: 14px;
     }
 
@@ -82,25 +76,24 @@
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 4;
+      z-index: 10;
       padding: 10px;
-      background: rgba(0,0,0,0.65);
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
+      background: rgba(0,0,0,0.7);
+      text-align: center;
     }
 
     button {
-      font-size: 14px;
       padding: 10px 14px;
-      border-radius: 10px;
+      font-size: 14px;
+      border-radius: 8px;
       border: none;
+      margin: 4px;
       background: #00e0ff;
       color: #000;
     }
   </style>
 </head>
+
 <body>
 <div id="appContainer">
 
@@ -108,6 +101,70 @@
     <video id="video" autoplay playsinline></video>
     <canvas id="renderCanvas"></canvas>
   </div>
+
+  <!-- PNG overlays -->
+  <img id="imgEgg" class="handPng" src="egg1.png">
+  <img id="imgPen" class="handPng" src="pen1.png">
+  <img id="imgPhone" class="handPng" src="phone1.png">
+  <img id="imgKey" class="handPng" src="key1.png">
+  <img id="imgSalute" class="handPng" src="salute.png">
+  <img id="imgRelax" class="handPng" src="fullopen.png">
+
+  <div id="resultArea">
+    <div id="result">State: RELAX</div>
+    <div id="status">Ready</div>
+  </div>
+
+  <div id="controlPanel">
+    <button id="startBtn">Start Camera</button>
+    <button id="lockBtn">Lock</button>
+  </div>
+
+</div>
+
+<script>
+  let currentGroup = 'relax';
+  let locked = false;
+
+  const video = document.getElementById('video');
+  const statusEl = document.getElementById('status');
+
+  const pngMap = {
+    egg: 'imgEgg',
+    pen: 'imgPen',
+    phone: 'imgPhone',
+    key: 'imgKey',
+    salute: 'imgSalute',
+    relax: 'imgRelax'
+  };
+
+  function activateHand(group) {
+    currentGroup = group;
+    document.querySelectorAll('.handPng').forEach(i => i.style.display = 'none');
+    const id = pngMap[group] || 'imgRelax';
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  }
+
+  document.getElementById('startBtn').onclick = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }, audio: false
+    });
+    video.srcObject = stream;
+    statusEl.textContent = 'Camera ON';
+  };
+
+  document.getElementById('lockBtn').onclick = () => {
+    locked = !locked;
+    if (locked) activateHand(currentGroup);
+    else document.querySelectorAll('.handPng').forEach(i => i.style.display = 'none');
+  };
+
+  // 初期表示
+  activateHand('relax');
+</script>
+</body>
+</html>
 
   <!-- ===== PNG Hand Overlays ===== -->
   <img id="imgEgg" class="handPng" src="egg1.png">
