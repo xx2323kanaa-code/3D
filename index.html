@@ -3,107 +3,98 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mobile Demo – Step 3</title>
+  <title>Future Hand Demo</title>
 
   <style>
     body {
       margin: 0;
       background: #000;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      text-align: center;
+      overflow: hidden;
     }
 
-    #hero {
-      width: 100%;
-      height: auto;
-      display: block;
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
     }
 
-    #video {
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: auto;
-      display: none;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 15%;
+      left: 35%;
+      width: 30%;
+      opacity: 0.85;
+      z-index: 2;
+      pointer-events: none;
     }
 
     #panel {
-      position: fixed;
+      position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 16px;
+      padding: 12px;
       background: rgba(0,0,0,0.6);
+      z-index: 3;
+      text-align: center;
     }
 
     button {
       font-size: 16px;
-      padding: 10px 18px;
-      margin: 6px;
+      padding: 10px 16px;
+      margin: 4px;
       border-radius: 10px;
       border: none;
-      background: #00e0ff;
-      color: #000;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 静止画（最初に表示） -->
-  <img id="hero" src="relax.png" alt="Future Hand">
-
-  <!-- カメラ映像（最初は非表示） -->
+<div id="stage">
   <video id="video" autoplay playsinline></video>
+  <img id="overlay" src="relax.png">
+</div>
 
-  <!-- 下の操作パネル -->
-  <div id="panel">
-    <button id="btnCamera">Start Camera</button>
-    <button id="btnImage">Change Image</button>
-    <div id="status" style="margin-top:8px;font-size:14px;">
-      Ready
-    </div>
-  </div>
+<div id="panel">
+  <button id="btnCamera">Start Camera</button>
+  <button id="btnImage">Change Image</button>
+</div>
 
-  <script>
-    const hero   = document.getElementById("hero");
-    const video  = document.getElementById("video");
-    const status = document.getElementById("status");
+<script>
+  const video   = document.getElementById("video");
+  const overlay = document.getElementById("overlay");
 
-    const btnCamera = document.getElementById("btnCamera");
-    const btnImage  = document.getElementById("btnImage");
+  let salute = false;
+  let cameraOn = false;
 
-    let usingSalute = false;
-    let cameraOn = false;
+  document.getElementById("btnImage").onclick = () => {
+    salute = !salute;
+    overlay.src = salute ? "salute.png" : "relax.png";
+  };
 
-    // 画像切り替え
-    btnImage.addEventListener("click", () => {
-      usingSalute = !usingSalute;
-      hero.src = usingSalute ? "salute.png" : "relax.png";
-      status.textContent = "Image: " + (usingSalute ? "salute" : "relax");
+  document.getElementById("btnCamera").onclick = async () => {
+    if (cameraOn) return;
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false
     });
 
-    // カメラ起動（必ずボタン操作）
-    btnCamera.addEventListener("click", async () => {
-      if (cameraOn) return;
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false
-        });
-
-        video.srcObject = stream;
-        video.style.display = "block";
-        hero.style.display = "none";
-
-        cameraOn = true;
-        status.textContent = "Camera ON";
-      } catch (e) {
-        status.textContent = "Camera failed";
-        alert("カメラを起動できませんでした");
-      }
-    });
-  </script>
+    video.srcObject = stream;
+    cameraOn = true;
+  };
+</script>
 
 </body>
 </html>
